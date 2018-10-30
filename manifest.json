@@ -1,0 +1,24 @@
+{
+    "author": "kennedy wambua",
+    "background_color": "#ffffff",
+    "description": "mws-restaurant-stage-2",
+    "display": "standalone",
+    "icons": [
+  
+      {
+        "src": "http://127.0.0.1:8888",
+        "sizes": "512x512",
+        "type": "img/logo.png"
+      }
+  
+    ],
+    "manifest_version": 1,
+    "name": "mws-restaurant-stage-2",
+    "orientation": "portrait",
+    "short_name": "restaurant",
+    "start_url": ".",
+    "theme_color": "#000000",
+    "version": "0.1"
+  
+  }
+  
