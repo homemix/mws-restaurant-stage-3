@@ -4,6 +4,21 @@ let restaurants,
 var newMap
 var markers = []
 
+
+// function for put into API 
+const putFetch = (url, data) => fetch(
+  url,
+  {
+    method: 'PUT',
+    body: JSON.stringify(data),
+    headers: {
+      'content-type': 'application/json'
+    }
+  }
+).then(res => {
+  res.json
+}).catch(err => console.log(err))
+
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -157,6 +172,8 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  const restaurantID = restaurant.id;
+  const favUrl = `${DBHelper.DATABASE_URL}/${restaurantID}`
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
@@ -179,6 +196,35 @@ createRestaurantHTML = (restaurant) => {
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
   li.append(address);
+
+  // choose favourite restaurant
+const favorite = document.createElement("button");
+favorite.id = `fav-${restaurant.id}`;
+favorite.onclick = chooseFavorite;
+
+if (restaurant.is_favorite === true) {
+  favorite.innerHTML = 'Unfavourite';
+} else {
+  favorite.innerHTML = 'favourite';
+}
+
+li.append(favorite);
+
+function chooseFavorite() {
+  if (favorite.innerHTML === 'favourite') {
+    // Send fetch to favorite
+    favorite.innerHTML = 'Unfavourite';
+    putFetch(favUrl, {
+      'is_favorite': true
+    })
+  } else {
+    favorite.innerHTML = 'favourite';
+    // Send fetch to unfavorite
+    putFetch(favUrl, {
+      'is_favorite': false
+    })
+  }
+}
 
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
