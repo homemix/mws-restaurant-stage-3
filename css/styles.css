@@ -510,3 +510,278 @@ nav h1 a {
 	  width: auto;
 	}
 }
+/* ====================== Form ====================== */
+legend {
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  padding: 10px 20px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+button {
+  height: 50px;
+  padding: 5px 10px;
+  border: 2px solid #b2b2b2;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 16px;
+  text-shadow: 0px 1px 1px #ffffff;
+}
+
+#comments {
+  border-bottom: 1px solid #d9d9d9;
+  border-top: 1px solid #fff;
+  width: 50%;
+  padding: 5px 10px 15px;
+  height: 450px;
+}
+
+label,
+input,
+textarea {
+  font: 1em sans-serif;
+}
+textarea {
+  width: 96%;
+  margin-top: 10px;
+}
+
+input {
+  width: 200px;
+  height: 40px;
+  margin: .5rem 0;
+  padding: .5rem;
+  border-radius: 5px;
+  padding: 5px 5px 5px 30px;
+  color: #5a5854;
+  background-color: #fff;
+  border: 1px solid #bdbdbd;
+}
+
+label {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+
+input:focus {
+  background-color: #ffffff;
+  border: 1px solid #b1e1e4;
+}
+
+.title {
+  margin-left: 10px;
+}
+form{
+  margin: 0;
+}
+fieldset {
+  padding: 0.75em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 5px;
+  height: 50%;
+  width: 90%;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+input[type= "radio"] {
+  display: none;
+}
+
+
+
+#stars  {
+  display: flex;
+  border: 0;
+  /*font-size: 0; */
+}
+
+.stars_group{
+  display: inline-flex;
+  direction: rtl;
+  text-align: center;
+  width: 100px;
+  border: 0;
+  margin-left: 20px;
+}
+
+#stars > .stars_group  label {
+  line-height: 2rem;
+  position: relative;
+  text-align: center;
+  width: 1em;
+  height: 2em;
+}
+
+.stars_group label:before {
+  content: "☆";
+  position: absolute;
+  margin: 0;
+  text-indent: 0;
+  line-height: 1em;
+  color: #aaa;
+}
+
+.stars_group label:hover:before,
+.stars_group label:hover~label:before,
+.stars_group input:checked~label:before {
+  content: "★";
+  color: #ffbb04;
+}
+
+.stars_group label:active {
+  color: #ccc;
+  top: 1px;
+}
+
+.submit {
+  width: 92%;
+  margin: 0 auto;
+}
+
+input[type ="button"] {
+  height: 30px;
+  width:50px;
+  background-color: #eee;
+  padding: 5px;
+  border: 2px solid #b2b2b2;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 16px;
+  text-shadow: 0px 1px 1px #ffffff;               
+}
+
+
+input[type ="button"]:clicked {
+ 
+  border: 2px solid #a9821a;;
+              
+}
+
+#favorite {
+  margin: 0;
+  width: 10%;
+  height: 16px;
+}
+label.is_favorite:hover{
+  color: #ffbb04;
+ }
+
+
+
+input[type="radio"]:checked + label {
+  color:#ffbb04;
+}
+
+/* ====================== Media Queries For Restaurant Review===================== */
+
+@media screen and (max-width: 644px) {
+  .inside {
+    background-color: #fdfdfd;
+    margin: 0;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    grid-template-areas: "header" "maincontent" "footer";
+    justify-content: center;
+  }
+  .inside > #header {
+    grid-area: header;
+    
+  }
+  .inside > #maincontent {
+    grid-area: maincontent;
+    border-top: 132px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    
+  }
+  .inside > #maincontent {
+    width: 100%;
+    background-color: #f3f3f3;
+    height: 100%;
+  }
+
+  .inside > #footer {
+    grid-area: footer;
+    bottom: 0;
+    padding: 10px;
+    flex: 1 1 auto;
+    grid-row: 3/4;
+    width: 100% !important;
+   
+  }
+
+  .inside #map-container,
+  .inside #restaurant-container,
+  .inside #comments,
+  .inside #reviews-container,
+  .inside #map{
+    width: 100%;
+    margin: 0;
+  }
+  .inside #map-container {
+    background: blue none repeat scroll 0 0;
+    position: absolute;
+    height: 41%;
+    right: 0;
+    top: 132px;
+  }
+
+  .inside #restaurant-container {
+    
+    padding: 310px 40px 20px 30px;
+  }
+
+  .inside #reviews-container {
+    
+      padding: 50px 40px 30px;
+  }
+
+  .inside #map {
+    background-color: #ccc;
+  }
+
+  .inside #restaurant-name {
+     font-size: 20pt;
+    font-weight: 200;
+    letter-spacing: 0;
+    margin: 25px 0 30px;
+  }
+
+    
+  fieldset {
+    padding: 1em;
+    height: 400px;
+    width: 100%;
+    margin-right:0;
+    margin-left:0;
+  }
+  .title {
+    margin-left: 0;
+  }
+
+
+.filter-options h2 {
+  display: none;
+}
+}
+/* ====== review form initial ===== */
+#formcomment{
+  width: 100%;padding: 0.8em;
+  margin-left: 0;
+  margin-right: 0;
+  height: auto;
+}
+
+

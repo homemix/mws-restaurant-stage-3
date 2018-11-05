@@ -3,6 +3,45 @@
  */
 class DBHelper {
 
+  static get dbName(){
+    return "dbRestaurant-static";
+  }
+  static get dbVersion(){
+    return 1;
+  }
+  static get dbStoreName(){
+    return "restaurants";
+  }
+
+  static get dbStoreReviews(){
+    return "reviews";
+  }
+  /**
+   * create db
+   */
+  static createIndexedDB() {
+    if (!navigator.serviceWorker) {
+      return Promise.resolve();
+     }
+   
+    if (!('indexedDB' in window)) {return null;}
+    
+    return idb.open(DBHelper.dbName, 2, (upgradeDb) =>  {
+        switch(upgradeDb.oldVersion) {
+          case 0:
+            const store = upgradeDb.createObjectStore('restaurants', {
+              keyPath: 'id'});
+           
+          case 1:
+          const reviewsStore = upgradeDb.createObjectStore('reviews', {
+            keyPath: 'id'});
+          reviewsStore.createIndex('restaurant','restaurant_id');
+         
+          }
+  
+    }); 
+  }
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -14,6 +53,268 @@ class DBHelper {
   
   }
 
+  static getObjectStore(dbs, storeName, mode) {
+    let tx = dbs.transaction(storeName, mode);
+return tx.objectStore(storeName);
+      
+}
+
+// save data from network to local indexDB
+static saveData(restaurantsJSON) {
+
+let restaurants = restaurantsJSON;
+console.log('restaurantsJSON ', restaurantsJSON);
+const dbPromise = this.createIndexedDB();
+
+dbPromise.then(db => {
+const store = this.getObjectStore(db, this.dbStoreName, 'readwrite');
+
+restaurants.forEach((restaurant) => {
+store.put(restaurant);
+})
+});
+}
+/**
+*  offline storage.
+*
+*/
+static setLocalStorage(offlineData) {
+const offlineReviews = localStorage.setItem('offlineData', offlineData);
+console.log("offline reviews saved", offlineReviews);
+return offlineReviews;
+
+}
+
+static getLocalStorage() {
+const fromOffLineToOnline = localStorage.getItem('offlineData');
+console.log("offline reviews saved", fromOffLineToOnline);
+return fromOffLineToOnline;
+}
+
+static clearLocalStorage() {
+localStorage.removeItem('offlineData');
+}
+static lengthLocalStorage() {
+return localStorage.length;
+}
+static getLocalData(db_promise) {
+
+return db_promise.then((db) => {
+  if (!db) return;
+  const store = this.getObjectStore(db, DBHelper.dbStoreName, 'readonly');
+  return store.getAll();
+});
+}
+/**
+*  Add  or update data to the server
+*
+*/
+static serverPostGetPut(url,options) {
+return fetch(url, options).then(response => {
+if (!response.ok) {
+  throw Error(response.statusText);
+}
+return response.json();
+});
+}
+
+static postUpdateServer(networkData){
+const urls = 'http://localhost:1337/reviews/';
+let localData = getOfflinePost();
+const headers = new Headers({'Content-Type': 'application/json'});
+const body = JSON.stringify(jsonData);
+let opts = {
+  method: 'POST',
+  mode: 'no-cors',
+  cache: "no-cache",
+  credentials: 'same-origin',
+  headers: headers,
+  body: localData
+}; 
+let localData = this.getOfflinePost();
+if(localData) {
+   this.serverPostGetPut(urls,opts);
+}
+}
+
+static getLocalDataByID(objectStoreName, indexName, indexID){
+const dbPromise = this.createIndexedDB();
+let id = parseInt(indexID);
+return dbPromise.then((db) => {
+  if (!db) return;
+  const store = this.getObjectStore(db, objectStoreName, 'readonly');
+  const storeIndex = store.index(indexName);
+  //storeIndex.getAll(id);
+  
+  return Promise.resolve(storeIndex.getAll(id));
+});
+
+}
+
+static updateFavoriteStatus(restaurantID, isFavorite){
+const localHostUrl = this.DATABASE_URL;
+console.log('updated favorite id', restaurantID);
+const URL = `${localHostUrl}/${restaurantID}`;
+
+const isFavoriteData = {
+is_favorite: isFavorite
+};
+
+const headers = new Headers({'Content-Type': 'application/json'});
+const body = JSON.stringify(isFavoriteData);
+let opts = {
+method: 'PUT',
+mode: 'cors',
+cache: "no-cache",
+credentials: 'same-origin',
+headers: headers,
+body: body
+
+};
+this.serverPostGetPut(URL, opts)
+.then(() => { 
+ console.log("Favorite updated: ")
+})
+.catch(error => console.log('Erro', error.message));
+
+}
+/**
+* Add reviews to local storage
+* Store reviews in indexdDB.
+*/
+static addReviewsToIndexDB(reviewsAdded){
+const reviews = reviewsAdded;
+console.log("reviews to be added: ", reviews);
+
+let dbPromise = this.createIndexedDB();
+ dbPromise
+       .then((db) => {
+           if (!db) return;
+           var tx = db.transaction('reviews', 'readwrite');
+           var storeReviews = tx.objectStore('reviews');
+
+
+           if (Array.isArray(reviews)){
+              reviews.forEach(review => {
+                storeReviews.put(review);
+              console.log('Restaurant review added: ', review);
+           });
+
+           }else {
+            console.log("reviews to be stored: ", reviews);
+             storeReviews.put(reviews);
+            console.log('Restaurant reviews added: ', reviews);
+           }
+            return Promise.resolve(reviews);
+       }); 
+
+}
+/**
+* Fetch a review by its ID from Server.
+* Store reviews in indexdDB.
+*/
+static fetchReviewsById(id){
+
+
+const option = {
+credentials: 'include'
+};
+const url = `http://localhost:1337/reviews/?restaurant_id=${id}`;
+
+let dbPromise = this.createIndexedDB();
+
+this.serverPostGetPut(url,option)
+.then(reviews => {
+    dbPromise
+       .then((db) => {
+           if (!db) return;
+
+           const store = this.getObjectStore(db, 'reviews', 'readwrite');
+
+           if (Array.isArray(reviews)){
+              reviews.forEach(review => {
+                store.put(review);
+              });
+
+           }else {
+            store.put(reviews);
+           }
+            console.log('Restaurant reviews added: ', reviews);
+            return Promise.resolve(reviews);
+       }); 
+})
+.catch((error) => {
+return this.getLocalDataByID('reviews', 'restaurant', id)
+              .then((storedReviews) => {
+              console.log('Looking for local data in indexedDB: ');
+              return Promise.resolve(storedReviews);
+            });
+  
+   
+});
+
+}
+
+/**
+* Add reviews to the server.
+* invoke fetchReviewsById().
+*/
+static addReviews(review){
+const option = {
+credentials: 'include'
+};
+const headers = new Headers({'Content-Type': 'application/json'});
+const body = JSON.stringify(review);
+let opts = {
+method: 'POST',
+mode: 'cors',
+cache: "no-cache",
+credentials: 'same-origin',
+headers: headers,
+body: body
+
+};
+
+const urlsReviews = `http://localhost:1337/reviews/`;
+this.serverPostGetPut(urlsReviews, opts)
+.then((data) => {
+
+console.log("Review added by addReviews: ", data.restaurant_id);
+ this.fetchReviewsById(data.restaurant_id);
+
+})
+.catch(error => console.log('Fail to add a review: ', error.message));
+
+}
+
+/**
+* Add off reviews to the server .
+* invoke getlocalStorage().
+*/
+static updateOnlineStatus(){
+const  offlineData = JSON.parse(DBHelper.getLocalStorage());
+
+if (localStorage.length) {
+this.addReviews(offlineData);
+console.log('LocalState: data sent to api: ', offlineData);
+localStorage.clear();
+} 
+
+}
+
+/**
+* Add off reviews to the server .
+* invoke getlocalStorage().
+*/
+static postOfflineReviews(offlineData){
+
+let postOnlineStatus = this.updateOnlineStatus();
+const offlineReviews = JSON.stringify(this.setLocalStorage(offlineData));
+
+
+console.log('offline data: ',offlineData);
+window.addEventListener('online',  postOnlineStatus);
+}
   /**
    * Fetch all restaurants.
    */
@@ -32,23 +333,7 @@ class DBHelper {
         console.log(restaurants);
       })
       .then(restaurants => callback(null, restaurants))
-      .catch(err => callback(err, null));
-    /** 
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        console.log(restaurants);
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
-    */
+  
   }
 
   /**
