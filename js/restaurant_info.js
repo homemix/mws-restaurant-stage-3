@@ -256,6 +256,12 @@ getFormData = () => {
           aRate = starList[i].value;
       }
   }
+  if (aName == "" || aComment == "")
+     {
+      const errorDisplay = document.getElementById("error")
+      errorDisplay.innerHTML= "Fields cannot be empty";
+     }
+     else{
   const formData = {
       restaurant_id: parseInt(restaurantId),
       name: aName,
@@ -265,6 +271,7 @@ getFormData = () => {
       
   };
    return formData; 
+}
 }
 postReview = () => {
  event.preventDefault();
